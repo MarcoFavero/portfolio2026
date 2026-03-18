@@ -241,6 +241,12 @@
     padding: 2rem 2rem 1.5rem; margin-bottom: 3.5rem;
   }
 
+  @media (max-width: 600px) {
+    .chart-wrap {
+      padding: 1.25rem 0.5rem 1rem;
+    }
+  }
+
   /* TABLE */
   .table-wrap { overflow-x: auto; margin-bottom: 3rem; }
   table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
@@ -505,7 +511,7 @@
 <header>
   <div class="header-top">
     <span class="logo" onclick="switchTab('bio')">Marco Favero</span>
-    <a href="/cdn-cgi/l/email-protection#aec3cfdccdc1c8cfd8cbdcc1eec2c7d8cb80cdc1c3" class="header-contact">GET IN TOUCH</a>
+    <a href="mailto:marcofavero@live.com" class="header-contact">GET IN TOUCH</a>
   </div>
   <div class="tab-bar">
     <div class="tab active" data-tab="bio">Bio</div>
@@ -531,7 +537,7 @@
           I try to stay close to what's moving in the AI space — and when something proves genuinely useful, I've gone as far as building tutorials and running workshops with the team to make adoption easier.
         </p>
         <div class="hero-btns">
-          <a href="/cdn-cgi/l/email-protection#3855594a5b575e594e5d4a577854514e5d165b5755" class="btn btn-primary">Get in touch</a>
+          <a href="mailto:marcofavero@live.com" class="btn btn-primary">Get in touch</a>
           <a href="https://www.linkedin.com/in/marcoafavero/" target="_blank" class="btn btn-ghost">LinkedIn ↗</a>
         </div>
       </div>
@@ -1104,7 +1110,7 @@
   <span style="font-family:'DM Mono',monospace; font-size:0.62rem; color:#2a2a2a; letter-spacing:0.08em;">vibe coded by Marco Favero with <a href="https://claude.ai" target="_blank" style="color:#333; text-decoration:none;" onmouseover="this.style.color='#c8f060'" onmouseout="this.style.color='#333'">Claude.ai</a></span>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
 <script>
   // TAB SWITCHING
@@ -1156,15 +1162,19 @@
     var pointColors = views.map(function(_, i) { return milestones.indexOf(i) >= 0 ? "#f06040" : "rgba(200,240,96,0.55)"; });
     var pointRadius = views.map(function(_, i) { return milestones.indexOf(i) >= 0 ? 7 : 3.5; });
     var ctx = canvas.getContext("2d");
+    var isMobile = window.innerWidth < 600;
+    var mobilePointRadius = views.map(function(_, i) { return milestones.indexOf(i) >= 0 ? 5 : 2; });
+
     chartInstance = new Chart(ctx, {
       type: "line",
       data: {
         labels: labels,
         datasets: [{
           data: views,
-          borderColor: "#c8f060", borderWidth: 2,
+          borderColor: "#c8f060", borderWidth: isMobile ? 1.5 : 2,
           pointBackgroundColor: pointColors, pointBorderColor: pointColors,
-          pointRadius: pointRadius, pointHoverRadius: 9,
+          pointRadius: isMobile ? mobilePointRadius : pointRadius,
+          pointHoverRadius: isMobile ? 6 : 9,
           tension: 0.3, fill: true,
           backgroundColor: function(ctx) {
             var chart = ctx.chart; var ca = chart.chartArea;
@@ -1179,7 +1189,22 @@
       options: {
         responsive: true,
         maintainAspectRatio: true,
+        aspectRatio: isMobile ? 1.2 : 2.5,
         interaction: { mode: "index", intersect: false },
+        onResize: function(chart, size) {
+          var mobile = size.width < 600;
+          var dataset = chart.data.datasets[0];
+          dataset.pointRadius = mobile
+            ? views.map(function(_, i) { return milestones.indexOf(i) >= 0 ? 5 : 2; })
+            : pointRadius;
+          dataset.pointHoverRadius = mobile ? 6 : 9;
+          dataset.borderWidth = mobile ? 1.5 : 2;
+          chart.options.aspectRatio = mobile ? 1.2 : 2.5;
+          chart.options.scales.x.ticks.maxTicksLimit = mobile ? 6 : 21;
+          chart.options.scales.x.ticks.maxRotation = mobile ? 90 : 45;
+          chart.options.scales.x.ticks.font.size = mobile ? 8 : 9;
+          chart.options.scales.y.ticks.font.size = mobile ? 8 : 9;
+        },
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -1188,30 +1213,37 @@
             titleFont: { family: "'DM Mono', monospace", size: 10 },
             bodyFont:  { family: "'DM Sans', sans-serif", size: 11 },
             callbacks: {
-            label: function(c) {
-              return " " + viewLabels[c.dataIndex] + " views";
+              label: function(c) {
+                return " " + viewLabels[c.dataIndex] + " views";
+              }
             }
           }
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: "rgba(255,255,255,0.04)" },
-          ticks: { color: "#444", font: { family: "'DM Mono',monospace", size: 9 }, maxRotation: 45 }
         },
-        y: {
-          grid: { color: "rgba(255,255,255,0.04)" },
-          ticks: {
-            color: "#444", font: { family: "'DM Mono',monospace", size: 9 },
-            callback: function(v) {
-              if (v >= 1000) return (v / 1000).toFixed(1).replace(/\.0$/, "") + "M";
-              return v + "K";
+        scales: {
+          x: {
+            grid: { color: "rgba(255,255,255,0.04)" },
+            ticks: {
+              color: "#444",
+              font: { family: "'DM Mono',monospace", size: isMobile ? 8 : 9 },
+              maxRotation: isMobile ? 90 : 45,
+              maxTicksLimit: isMobile ? 6 : 21,
+              autoSkip: true
+            }
+          },
+          y: {
+            grid: { color: "rgba(255,255,255,0.04)" },
+            ticks: {
+              color: "#444",
+              font: { family: "'DM Mono',monospace", size: isMobile ? 8 : 9 },
+              callback: function(v) {
+                if (v >= 1000) return (v / 1000).toFixed(1).replace(/\.0$/, "") + "M";
+                return v + "K";
+              }
             }
           }
         }
       }
-    }
-  });
+    });
   chartInitialized = true;
 }
 </script>
