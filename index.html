@@ -407,7 +407,7 @@ It was against this backdrop — a real, felt operational bottleneck — that a 
 <div id="panel-ads" class="panel"><div class="panel-inner"><div class="section-header"><h2 class="section-title">Ad Creatives</h2></div>
 <div class="ad-gallery" role="list">
   <div class="ad-cell" role="listitem">
-    <button type="button" class="ad-thumb loading" data-vimeo="1174566732" aria-haspopup="dialog" aria-label="Watch: Texture as Brand Language">
+    <button type="button" class="ad-thumb loading" data-vimeo="1174566732" data-vimeo-hash="cebad6f59c" aria-haspopup="dialog" aria-label="Watch: Texture as Brand Language">
       <span class="ad-thumb-media"><img alt="" decoding="async"></span>
       <span class="ad-thumb-play" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></span>
       <span class="ad-thumb-title" aria-hidden="true">Texture as Brand Language</span>
@@ -800,11 +800,11 @@ It was against this backdrop — a real, felt operational bottleneck — that a 
     next();
   }
 
-  // Local-first: tries img/ads/<vimeo-id>.jpg (or data-thumb) and only asks Vimeo if that file is missing.
-  // Relative path on purpose: a leading "/" breaks on GitHub project pages (user.github.io/repo/).
+  // Local-first: tries /img/ads/<vimeo-id>.jpg (or data-thumb) and only asks Vimeo if that file is missing.
+  // Root-absolute on purpose: tabs are routed as /ads, /cv, ... so a relative path would break on /ads/ (trailing slash).
   function resolve(btn) {
     var id = btn.getAttribute("data-vimeo");
-    var local = btn.getAttribute("data-thumb") || ("img/ads/" + id + ".jpg");
+    var local = btn.getAttribute("data-thumb") || ("/img/ads/" + id + ".jpg");
     var probe = new Image();
     probe.onload = function () { loadThumb(btn, [local]); };
     probe.onerror = function () { resolveVimeo(btn); };
