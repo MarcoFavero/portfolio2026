@@ -585,7 +585,7 @@ It was against this backdrop — a real, felt operational bottleneck — that a 
     </button>
   </div>
 </div>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
 <script>
   // DYNAMIC HEADER OFFSET
@@ -800,10 +800,19 @@ It was against this backdrop — a real, felt operational bottleneck — that a 
     next();
   }
 
+  // Local-first: tries img/ads/<vimeo-id>.jpg (or data-thumb) and only asks Vimeo if that file is missing.
+  // Relative path on purpose: a leading "/" breaks on GitHub project pages (user.github.io/repo/).
   function resolve(btn) {
     var id = btn.getAttribute("data-vimeo");
-    var local = btn.getAttribute("data-thumb"); // optional: your own 9:16 file, e.g. /img/ad-1.jpg
-    if (local) { loadThumb(btn, [local]); return; }
+    var local = btn.getAttribute("data-thumb") || ("img/ads/" + id + ".jpg");
+    var probe = new Image();
+    probe.onload = function () { loadThumb(btn, [local]); };
+    probe.onerror = function () { resolveVimeo(btn); };
+    probe.src = local;
+  }
+
+  function resolveVimeo(btn) {
+    var id = btn.getAttribute("data-vimeo");
 
     // Vimeo's thumbnail URL looks like  .../video/123-abc-d_295x166?region=us
     // keep everything except the size, then ask for vertical sizes instead
